@@ -1,40 +1,39 @@
-package com.github.supermoonie.cef.win;
+package com.github.supermoonie.cef;
 
-import org.cef.*;
+import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.util.SystemInfo;
+import com.github.supermoonie.cef.handler.FileHandler;
+import com.github.supermoonie.cef.ui.MenuBar;
+import org.cef.CefApp;
 import org.cef.CefApp.CefAppState;
+import org.cef.CefClient;
+import org.cef.CefSettings;
+import org.cef.JCefLoader;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
+import org.cef.browser.CefMessageRouter;
 import org.cef.handler.CefAppHandlerAdapter;
 import org.cef.handler.CefDisplayHandlerAdapter;
 import org.cef.handler.CefFocusHandlerAdapter;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.KeyboardFocusManager;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.IOException;
-
-import javax.swing.JFrame;
-import javax.swing.JTextField;
 
 /**
  * This is a simple example application using JCEF.
  * It displays a JFrame with a JTextField at its top and a CefBrowser in its
  * center. The JTextField is used to enter and assign an URL to the browser UI.
  * No additional handlers or callbacks are used in this example.
- *
+ * <p>
  * The number of used JCEF classes is reduced (nearly) to its minimum and should
  * assist you to get familiar with JCEF.
- *
+ * <p>
  * For a more feature complete example have also a look onto the example code
  * within the package "tests.detailed".
  */
-public class MainFrame extends JFrame {
+public class App extends JFrame {
     private static final long serialVersionUID = -5570653778104813836L;
     private final JTextField address_;
     private final CefApp cefApp_;
@@ -50,7 +49,7 @@ public class MainFrame extends JFrame {
      * But to be more verbose, this CTOR keeps an instance of each object on the
      * way to the browser UI.
      */
-    private MainFrame(String startURL, boolean useOSR, boolean isTransparent) throws IOException {
+    private App(String startURL, boolean useOSR, boolean isTransparent) throws IOException {
         // (1) The entry point to JCEF is always the class CefApp. There is only one
         //     instance per application and therefore you have to call the method
         //     "getInstance()" instead of a CTOR.
@@ -63,7 +62,9 @@ public class MainFrame extends JFrame {
             @Override
             public void stateHasChanged(org.cef.CefApp.CefAppState state) {
                 // Shutdown the app if the native CEF part is terminated
-                if (state == CefAppState.TERMINATED) System.exit(0);
+                if (state == CefAppState.TERMINATED) {
+                    System.exit(0);
+                }
             }
         });
         CefSettings settings = new CefSettings();
@@ -119,6 +120,11 @@ public class MainFrame extends JFrame {
         // Update the address field when the browser URL changes.
         client_.addDisplayHandler(new CefDisplayHandlerAdapter() {
             @Override
+            public void onTitleChange(CefBrowser browser, String title) {
+                App.this.setTitle(title);
+            }
+
+            @Override
             public void onAddressChange(CefBrowser browser, CefFrame frame, String url) {
                 address_.setText(url);
             }
@@ -128,7 +134,9 @@ public class MainFrame extends JFrame {
         address_.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (!browserFocus_) return;
+                if (!browserFocus_) {
+                    return;
+                }
                 browserFocus_ = false;
                 KeyboardFocusManager.getCurrentKeyboardFocusManager().clearGlobalFocusOwner();
                 address_.requestFocus();
@@ -151,13 +159,22 @@ public class MainFrame extends JFrame {
             }
         });
 
+        CefMessageRouter msgRouter = CefMessageRouter.create(new CefMessageRouter.CefMessageRouterConfig("fileQuery", "cancelFilerQuery"));
+        msgRouter.addHandler(new FileHandler(this), false);
+        client_.addMessageRouter(msgRouter);
+
+        MenuBar menuBar = new MenuBar(this, browser_);
+        setJMenuBar(menuBar);
+
         // (5) All UI components are assigned to the default content pane of this
         //     JFrame and afterwards the frame is made visible to the user.
         getContentPane().add(address_, BorderLayout.NORTH);
         getContentPane().add(browerUI_, BorderLayout.CENTER);
         pack();
-        setSize(800, 600);
+        setSize(1200, 800);
+        setResizable(true);
         setVisible(true);
+        setLocationRelativeTo(null);
 
         // (6) To take care of shutting down CEF accordingly, it's important to call
         //     the method "dispose()" of the CefApp instance if the Java
@@ -171,17 +188,25 @@ public class MainFrame extends JFrame {
         });
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
 //        // Perform startup initialization on platforms that require it.
 //        if (!CefApp.startup(args)) {
 //            System.out.println("Startup initialization failed!");
 //            return;
 //        }
+        if (SystemInfo.isMacOS) {
+            System.setProperty("apple.laf.useScreenMenuBar", "true");
+        }
+        // enable window decorations
+        JFrame.setDefaultLookAndFeelDecorated(true);
+        JDialog.setDefaultLookAndFeelDecorated(true);
+        FlatLightLaf.install();
+        UIManager.setLookAndFeel(FlatLightLaf.class.getName());
 
         // The simple example application is created as anonymous class and points
         // to Google as the very first loaded page. Windowed rendering mode is used by
         // default. If you want to test OSR mode set |useOsr| to true and recompile.
         boolean useOsr = false;
-        new MainFrame("https://www.baidu.com", useOsr, false);
+        new App("file://D:\\Projects\\jcef-win\\src\\main\\resources\\Main.html", useOsr, false);
     }
 }
