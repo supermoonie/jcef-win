@@ -3,6 +3,7 @@ package com.github.supermoonie.cef;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.github.supermoonie.cef.handler.FileHandler;
+import com.github.supermoonie.cef.handler.SvgConvertHandler;
 import com.github.supermoonie.cef.ui.MenuBar;
 import org.cef.CefApp;
 import org.cef.CefApp.CefAppState;
@@ -147,7 +148,9 @@ public class App extends JFrame {
         client_.addFocusHandler(new CefFocusHandlerAdapter() {
             @Override
             public void onGotFocus(CefBrowser browser) {
-                if (browserFocus_) return;
+                if (browserFocus_) {
+                    return;
+                }
                 browserFocus_ = true;
                 KeyboardFocusManager.getCurrentKeyboardFocusManager().clearGlobalFocusOwner();
                 browser.setFocus(true);
@@ -159,10 +162,12 @@ public class App extends JFrame {
             }
         });
 
-        CefMessageRouter msgRouter = CefMessageRouter.create(new CefMessageRouter.CefMessageRouterConfig("fileQuery", "cancelFilerQuery"));
-        msgRouter.addHandler(new FileHandler(this), false);
-        client_.addMessageRouter(msgRouter);
-
+        CefMessageRouter fileRouter = CefMessageRouter.create(new CefMessageRouter.CefMessageRouterConfig("fileQuery", "cancelFilerQuery"));
+        fileRouter.addHandler(new FileHandler(this), false);
+        CefMessageRouter svgRouter = CefMessageRouter.create(new CefMessageRouter.CefMessageRouterConfig("svgQuery", "cancelSvgQuery"));
+        svgRouter.addHandler(new SvgConvertHandler(), false);
+        client_.addMessageRouter(fileRouter);
+        client_.addMessageRouter(svgRouter);
         MenuBar menuBar = new MenuBar(this, browser_);
         setJMenuBar(menuBar);
 
