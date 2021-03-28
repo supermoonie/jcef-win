@@ -35,38 +35,22 @@
             <artifactId>jcef-natives-win64</artifactId>
             <version>84.3.8+gc8a556f+chromium-84.0.4147.105</version>
         </dependency>
-        <!-- sqlite -->
-        <dependency>
-            <groupId>com.j256.ormlite</groupId>
-            <artifactId>ormlite-core</artifactId>
-            <version>5.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.j256.ormlite</groupId>
-            <artifactId>ormlite-jdbc</artifactId>
-            <version>5.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.supermoonie</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>3.31.2</version>
-        </dependency>
         <!-- flat look and feel -->
-        <dependency>
-            <groupId>com.formdev</groupId>
-            <artifactId>flatlaf</artifactId>
-            <version>0.44</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.formdev</groupId>-->
+<!--            <artifactId>flatlaf</artifactId>-->
+<!--            <version>0.44</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-extras</artifactId>
             <version>0.44</version>
         </dependency>
-        <dependency>
-            <groupId>com.formdev</groupId>
-            <artifactId>flatlaf-intellij-themes</artifactId>
-            <version>0.44</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.formdev</groupId>-->
+<!--            <artifactId>flatlaf-intellij-themes</artifactId>-->
+<!--            <version>0.44</version>-->
+<!--        </dependency>-->
         <!-- jackson -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -100,7 +84,12 @@
             <artifactId>batik-codec</artifactId>
             <version>1.14</version>
         </dependency>
-
+        <!-- 图片resize -->
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.11</version>
+        </dependency>
     </dependencies>
 
     <repositories>
@@ -128,62 +117,112 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.4</version>
+                <configuration>
+                    <mainClass>com.github.supermoonie.cef.App</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.github.fvarrui</groupId>
+                <artifactId>javapackager</artifactId>
+                <version>1.1.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>package</goal>
                         </goals>
                         <configuration>
-                            <finalName>${project.artifactId}-jar-with-dependencies</finalName>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <manifestEntries>
-                                        <Main-Class>com.github.supermoonie.cef.App</Main-Class>
-                                    </manifestEntries>
-                                </transformer>
-                            </transformers>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>jcef-natives-*.jar</exclude>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.cef</groupId>
-                <artifactId>jcef-bundle-maven-plugin</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <id>win</id>
-                        <goals>
-                            <goal>win32</goal>
-                        </goals>
-                        <configuration>
-                            <exportType>zip</exportType>
-                            <relocations>
-                                <relocation>${project.artifactId}-jar-with-dependencies.jar:${project.artifactId}.jar
-                                </relocation>
-                            </relocations>
-<!--                            <mainClass>com.github.supermoonie.cef.App</mainClass>-->
+<!--                            <additionalResources>D:/Projects/jcef-win/target/jcef-bundle-win32/cef_bundle</additionalResources>-->
+<!--                            <runnableJar>D:/Projects/jcef-win/target/jcef-bundle-win32/jcef-win.jar</runnableJar>-->
+                            <displayName>MProxy</displayName>
+                            <!-- mandatory -->
+                            <mainClass>com.github.supermoonie.cef.App</mainClass>
+                            <!-- optional -->
+                            <assetsDir>${basedir}/assets</assetsDir>
+                            <copyDependencies>true</copyDependencies>
+                            <bundleJre>true</bundleJre>
+                            <generateInstaller>true</generateInstaller>
+                            <administratorRequired>false</administratorRequired>
+                            <platform>auto</platform>
+                            <winConfig>
+                                <generateMsi>false</generateMsi>
+                            </winConfig>
+                            <macConfig>
+                                <generateDmg>true</generateDmg>
+                                <generatePkg>true</generatePkg>
+                                <iconSize>128</iconSize>
+                                <volumeIcon>${basedir}/assets/mac/proxy-fx.icns</volumeIcon>
+                                <volumeName>${project.name}</volumeName>
+                            </macConfig>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
+
+<!--    <build>-->
+<!--        <plugins>-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-shade-plugin</artifactId>-->
+<!--                <version>3.2.4</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>shade</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <finalName>${project.artifactId}-jar-with-dependencies</finalName>-->
+<!--                            <transformers>-->
+<!--                                <transformer-->
+<!--                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+<!--                                    <manifestEntries>-->
+<!--                                        <Main-Class>com.github.supermoonie.cef.App</Main-Class>-->
+<!--                                    </manifestEntries>-->
+<!--                                </transformer>-->
+<!--                            </transformers>-->
+<!--                            <filters>-->
+<!--                                <filter>-->
+<!--                                    <artifact>*:*</artifact>-->
+<!--                                    <excludes>-->
+<!--                                        <exclude>jcef-natives-*.jar</exclude>-->
+<!--                                        <exclude>META-INF/*.SF</exclude>-->
+<!--                                        <exclude>META-INF/*.DSA</exclude>-->
+<!--                                        <exclude>META-INF/*.RSA</exclude>-->
+<!--                                    </excludes>-->
+<!--                                </filter>-->
+<!--                            </filters>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+<!--            <plugin>-->
+<!--                <groupId>org.cef</groupId>-->
+<!--                <artifactId>jcef-bundle-maven-plugin</artifactId>-->
+<!--                <version>1.0</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>win</id>-->
+<!--                        <goals>-->
+<!--                            <goal>win32</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <exportType>zip</exportType>-->
+<!--                            <relocations>-->
+<!--                                <relocation>${project.artifactId}-jar-with-dependencies.jar:${project.artifactId}.jar-->
+<!--                                </relocation>-->
+<!--                            </relocations>-->
+<!--&lt;!&ndash;                            <mainClass>com.github.supermoonie.cef.App</mainClass>&ndash;&gt;-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+<!--        </plugins>-->
+<!--    </build>-->
 
 </project>

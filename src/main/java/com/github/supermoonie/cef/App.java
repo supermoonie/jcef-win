@@ -1,10 +1,14 @@
 package com.github.supermoonie.cef;
 
-import com.formdev.flatlaf.FlatLightLaf;
-import com.formdev.flatlaf.util.SystemInfo;
+import com.formdev.flatlaf.extras.SVGUtils;
+import com.github.supermoonie.cef.cefhandler.ContextMenuHandler;
+import com.github.supermoonie.cef.cefhandler.JSDialogHandler;
+import com.github.supermoonie.cef.dialog.DownloadDialog;
 import com.github.supermoonie.cef.handler.FileHandler;
+import com.github.supermoonie.cef.handler.FileServerHandler;
 import com.github.supermoonie.cef.handler.SvgConvertHandler;
 import com.github.supermoonie.cef.ui.MenuBar;
+import org.apache.commons.lang3.SystemUtils;
 import org.cef.CefApp;
 import org.cef.CefApp.CefAppState;
 import org.cef.CefClient;
@@ -16,6 +20,8 @@ import org.cef.browser.CefMessageRouter;
 import org.cef.handler.CefAppHandlerAdapter;
 import org.cef.handler.CefDisplayHandlerAdapter;
 import org.cef.handler.CefFocusHandlerAdapter;
+import org.cef.handler.CefLoadHandlerAdapter;
+import org.cef.network.CefRequest;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,6 +57,7 @@ public class App extends JFrame {
      * way to the browser UI.
      */
     private App(String startURL, boolean useOSR, boolean isTransparent) throws IOException {
+        setIconImages(SVGUtils.createWindowIconImages("/lighting.svg"));
         // (1) The entry point to JCEF is always the class CefApp. There is only one
         //     instance per application and therefore you have to call the method
         //     "getInstance()" instead of a CTOR.
@@ -102,7 +109,6 @@ public class App extends JFrame {
         //     it can be embedded into any AWT UI.
         browser_ = client_.createBrowser(startURL, useOSR, isTransparent);
         browerUI_ = browser_.getUIComponent();
-
         // (4) For this minimal browser, we need only a text field to enter an URL
         //     we want to navigate to and a CefBrowser window to display the content
         //     of the URL. To respond to the input of the user, we're registering an
@@ -120,6 +126,7 @@ public class App extends JFrame {
 
         // Update the address field when the browser URL changes.
         client_.addDisplayHandler(new CefDisplayHandlerAdapter() {
+
             @Override
             public void onTitleChange(CefBrowser browser, String title) {
                 App.this.setTitle(title);
@@ -128,6 +135,24 @@ public class App extends JFrame {
             @Override
             public void onAddressChange(CefBrowser browser, CefFrame frame, String url) {
                 address_.setText(url);
+            }
+        });
+        client_.addJSDialogHandler(new JSDialogHandler());
+        client_.addDownloadHandler(new DownloadDialog(this));
+        client_.addContextMenuHandler(new ContextMenuHandler(this));
+        client_.addLoadHandler(new CefLoadHandlerAdapter() {
+            @Override
+            public void onLoadStart(CefBrowser browser, CefFrame frame, CefRequest.TransitionType transitionType) {
+                browser.executeJavaScript(
+//                        "window.File = function(){}; window.FileList = function(){}; window.FileServer = function(){}; " +
+                        "window.saveAs = function(a, b) {var reader = new FileReader();\n" +
+                                " reader.readAsDataURL(a); \n" +
+                                " reader.onloadend = function() {\n" +
+                                "     var base64data = reader.result;\n" +
+                                "     window.saveImage({request: base64data, onSuccess: function(res) {alert('success!')}});\n" +
+                                "     console.log(base64data);\n" +
+                                " };}", null, 0);
+                super.onLoadStart(browser, frame, transitionType);
             }
         });
 
@@ -168,6 +193,9 @@ public class App extends JFrame {
         svgRouter.addHandler(new SvgConvertHandler(), false);
         client_.addMessageRouter(fileRouter);
         client_.addMessageRouter(svgRouter);
+        CefMessageRouter fileServerRouter = CefMessageRouter.create(new CefMessageRouter.CefMessageRouterConfig("saveImage", "cancelSaveImage"));
+        fileServerRouter.addHandler(new FileServerHandler(this), false);
+        client_.addMessageRouter(fileServerRouter);
         MenuBar menuBar = new MenuBar(this, browser_);
         setJMenuBar(menuBar);
 
@@ -199,19 +227,24 @@ public class App extends JFrame {
 //            System.out.println("Startup initialization failed!");
 //            return;
 //        }
-        if (SystemInfo.isMacOS) {
+
+        if (SystemUtils.IS_OS_MAC_OSX) {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
         }
         // enable window decorations
         JFrame.setDefaultLookAndFeelDecorated(true);
         JDialog.setDefaultLookAndFeelDecorated(true);
-        FlatLightLaf.install();
-        UIManager.setLookAndFeel(FlatLightLaf.class.getName());
+//        FlatLightLaf.install();
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
+//        FlatInspector.install("ctrl shift alt X");
+//        FlatUIDefaultsInspector.install("ctrl shift alt Y");
 
         // The simple example application is created as anonymous class and points
         // to Google as the very first loaded page. Windowed rendering mode is used by
         // default. If you want to test OSR mode set |useOsr| to true and recompile.
         boolean useOsr = false;
-        new App("file://D:\\Projects\\jcef-win\\src\\main\\resources\\Main.html", useOsr, false);
+//        new App("file://D:\\Projects\\jcef-win\\src\\main\\resources\\Main.html", useOsr, false);
+        new App("http://localhost:3050/", useOsr, false);
     }
 }
