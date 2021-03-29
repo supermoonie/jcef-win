@@ -1,7 +1,7 @@
-package com.github.supermoonie.cef.handler;
+package com.github.supermoonie.cef.handler.router;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.github.supermoonie.cef.handler.request.SvgToPngRequest;
+import com.github.supermoonie.cef.handler.router.request.SvgToPngRequest;
 import com.github.supermoonie.cef.util.Jackson;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;

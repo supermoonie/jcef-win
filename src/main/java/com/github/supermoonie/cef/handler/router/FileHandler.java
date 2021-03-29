@@ -1,8 +1,8 @@
-package com.github.supermoonie.cef.handler;
+package com.github.supermoonie.cef.handler.router;
 
-import com.github.supermoonie.cef.handler.request.FileSaveDialogRequest;
-import com.github.supermoonie.cef.handler.request.FileSelectRequest;
-import com.github.supermoonie.cef.handler.response.FileSelectResponse;
+import com.github.supermoonie.cef.handler.router.request.FileSaveDialogRequest;
+import com.github.supermoonie.cef.handler.router.request.FileSelectRequest;
+import com.github.supermoonie.cef.handler.router.response.FileSelectResponse;
 import com.github.supermoonie.cef.util.Jackson;
 import org.apache.commons.lang3.StringUtils;
 import org.cef.browser.CefBrowser;

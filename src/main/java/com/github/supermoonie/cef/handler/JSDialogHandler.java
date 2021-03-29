@@ -2,7 +2,7 @@
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
-package com.github.supermoonie.cef.cefhandler;
+package com.github.supermoonie.cef.handler;
 
 import org.cef.browser.CefBrowser;
 import org.cef.callback.CefJSDialogCallback;

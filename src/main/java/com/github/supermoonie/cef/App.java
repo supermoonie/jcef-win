@@ -1,12 +1,12 @@
 package com.github.supermoonie.cef;
 
 import com.formdev.flatlaf.extras.SVGUtils;
-import com.github.supermoonie.cef.cefhandler.ContextMenuHandler;
-import com.github.supermoonie.cef.cefhandler.JSDialogHandler;
+import com.github.supermoonie.cef.handler.ContextMenuHandler;
+import com.github.supermoonie.cef.handler.JSDialogHandler;
 import com.github.supermoonie.cef.dialog.DownloadDialog;
-import com.github.supermoonie.cef.handler.FileHandler;
-import com.github.supermoonie.cef.handler.FileServerHandler;
-import com.github.supermoonie.cef.handler.SvgConvertHandler;
+import com.github.supermoonie.cef.handler.router.FileHandler;
+import com.github.supermoonie.cef.handler.router.FileServerHandler;
+import com.github.supermoonie.cef.handler.router.SvgConvertHandler;
 import com.github.supermoonie.cef.ui.MenuBar;
 import org.apache.commons.lang3.SystemUtils;
 import org.cef.CefApp;

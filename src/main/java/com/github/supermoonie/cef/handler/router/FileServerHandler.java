@@ -1,4 +1,4 @@
-package com.github.supermoonie.cef.handler;
+package com.github.supermoonie.cef.handler.router;
 
 import org.apache.commons.io.FileUtils;
 import org.cef.browser.CefBrowser;
